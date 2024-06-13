@@ -1,0 +1,13 @@
+env: "local" #local, dev, prod
+postgres:
+  user: "root"
+  password: "root"
+  address: "localhost"
+  ssl: false #false, true
+  port: "5432"
+  db: "postgres"
+  test_db: "test"
+http_server:
+  address: "localhost:3000"
+  timeout: 4s
+  idle_timeout: 60s
