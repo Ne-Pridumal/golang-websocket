@@ -1,12 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE rooms (
-  id SERIAL PRIMARY KEY,
-  name text not null
-);
+ALTER TABLE rooms_users ADD PRIMARY KEY(room_id, user_id);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE rooms;
+DROP TABLE rooms_users;
 -- +goose StatementEnd

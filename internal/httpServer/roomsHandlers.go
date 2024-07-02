@@ -46,7 +46,6 @@ func (h *roomsHandlers) subscribeUserToRoom(w http.ResponseWriter, r *http.Reque
 func (h *roomsHandlers) create(w http.ResponseWriter, r *http.Request) {
 	const op = "htmlServer.roomsHandlers.createRoom"
 	type request struct {
-		Id   int    `json:"room-id"`
 		Name string `json:"room-name"`
 	}
 	type response struct {
@@ -59,7 +58,6 @@ func (h *roomsHandlers) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	room := &postgres.Room{
-		ID:   req.Id,
 		Name: req.Name,
 	}
 	if err := h.repository.Create(r.Context(), room); err != nil {

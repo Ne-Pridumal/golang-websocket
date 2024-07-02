@@ -11,5 +11,5 @@ CREATE TABLE messages (
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+DROP TABLE messages;
 -- +goose StatementEnd
