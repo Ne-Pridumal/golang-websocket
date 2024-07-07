@@ -2,7 +2,7 @@ package postgres_test
 
 import (
 	"context"
-	"golang-websocket-chat/internal/storage/postgres"
+	"golang-websocket-chat/internal/models"
 	"testing"
 	"time"
 
@@ -13,7 +13,7 @@ func TestMessagesRepository_Create(t *testing.T) {
 	pg, d := testPostgres(t)
 	ctx := context.Background()
 	defer d("rooms", "messages")
-	room := &postgres.Room{
+	room := &models.Room{
 		ID:   1,
 		Name: "test",
 	}
@@ -21,7 +21,7 @@ func TestMessagesRepository_Create(t *testing.T) {
 	err := pg.Rooms().Create(ctx, room)
 	assert.NoError(t, err)
 
-	message := &postgres.Message{
+	message := &models.Message{
 		ID:      2342,
 		RoomId:  1,
 		Date:    time.Now(),
@@ -37,7 +37,7 @@ func TestMessageRepository_Delete(t *testing.T) {
 	ctx := context.Background()
 	defer d("rooms", "messages")
 
-	room := &postgres.Room{
+	room := &models.Room{
 		ID:   1,
 		Name: "test",
 	}
@@ -45,7 +45,7 @@ func TestMessageRepository_Delete(t *testing.T) {
 	err := pg.Rooms().Create(ctx, room)
 	assert.NoError(t, err)
 
-	message := &postgres.Message{
+	message := &models.Message{
 		ID:      2342,
 		RoomId:  1,
 		Date:    time.Now(),

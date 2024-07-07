@@ -2,7 +2,7 @@ package postgres_test
 
 import (
 	"context"
-	"golang-websocket-chat/internal/storage/postgres"
+	"golang-websocket-chat/internal/models"
 	"testing"
 	"time"
 
@@ -13,7 +13,7 @@ func TestRoomsRepository_Create(t *testing.T) {
 	pg, d := testPostgres(t)
 	ctx := context.Background()
 	defer d("rooms")
-	room := &postgres.Room{
+	room := &models.Room{
 		ID:   1,
 		Name: "test",
 	}
@@ -27,7 +27,7 @@ func TestRoomsRepository_Delete(t *testing.T) {
 	ctx := context.Background()
 	defer d("rooms")
 
-	room := &postgres.Room{
+	room := &models.Room{
 		ID:   id,
 		Name: "string",
 	}
@@ -44,17 +44,17 @@ func TestRoomsRepository_GetById(t *testing.T) {
 	ctx := context.Background()
 	defer d("rooms", "messages")
 
-	message := &postgres.Message{
+	message := &models.Message{
 		ID:      2342,
 		RoomId:  id,
 		Date:    time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC),
 		Content: "some content",
 	}
 
-	room := &postgres.Room{
+	room := &models.Room{
 		ID:       id,
 		Name:     "string",
-		Messages: []postgres.Message{*message},
+		Messages: []models.Message{*message},
 	}
 
 	err := pg.Rooms().Create(ctx, room)
@@ -72,24 +72,24 @@ func TestRoomsRepository_AddUser(t *testing.T) {
 	roomId := 32423
 	userId := 12341234
 
-	user := &postgres.User{
+	user := &models.User{
 		ID:   userId,
 		Name: "user",
 	}
 
-	room := &postgres.Room{
+	room := &models.Room{
 		ID:   roomId,
 		Name: "test",
 	}
 
-	var usersSlice = []postgres.User{
+	var usersSlice = []models.User{
 		{
 			ID:   userId,
 			Name: "user",
 		},
 	}
 
-	idlRoom := &postgres.Room{
+	idlRoom := &models.Room{
 		ID:    roomId,
 		Name:  "test",
 		Users: usersSlice,

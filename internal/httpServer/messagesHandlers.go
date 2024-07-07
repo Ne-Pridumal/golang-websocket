@@ -6,37 +6,42 @@ import (
 	"golang-websocket-chat/internal/models"
 	resp "golang-websocket-chat/lib/api/response"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
 
-type roomsRepository interface {
-	Create(context.Context, *models.Room) error
+type messagesRepository interface {
+	Create(context.Context, *models.Message) error
 	Delete(context.Context, int) error
-	GetById(context.Context, int) (*models.Room, error)
-	AddUser(context.Context, int, int) error
-}
-type roomsHandlers struct {
-	repository roomsRepository
 }
 
-func (h *roomsHandlers) subscribeUserToRoom(w http.ResponseWriter, r *http.Request) {
+type messagesHandlers struct {
+	repository messagesRepository
+}
+
+func (h *messagesHandlers) sendMessage(w http.ResponseWriter, r *http.Request) {
 	type request struct {
-		UserId int `json:"user-id"`
-		RoomId int `json:"room-id"`
+		RoomId  int    `json:"room-id"`
+		Content string `json:"content"`
 	}
+
 	type response struct {
 		resp.Response
 	}
+
 	req := &request{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		render.JSON(w, r, resp.Error(err.Error()))
 		return
 	}
-	if err := h.repository.AddUser(
+	if err := h.repository.Create(
 		r.Context(),
-		req.RoomId,
-		req.UserId,
+		&models.Message{
+			RoomId:  req.RoomId,
+			Content: req.Content,
+		},
 	); err != nil {
 		render.JSON(w, r, resp.Error(err.Error()))
 		return
@@ -46,22 +51,19 @@ func (h *roomsHandlers) subscribeUserToRoom(w http.ResponseWriter, r *http.Reque
 	})
 }
 
-func (h *roomsHandlers) create(w http.ResponseWriter, r *http.Request) {
-	type request struct {
-		Name string `json:"room-name"`
-	}
+func (h *messagesHandlers) deleteMessage(w http.ResponseWriter, r *http.Request) {
 	type response struct {
 		resp.Response
 	}
-	req := &request{}
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+
+	p := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(p)
+
+	if err != nil {
 		render.JSON(w, r, resp.Error(err.Error()))
 		return
 	}
-	room := &models.Room{
-		Name: req.Name,
-	}
-	if err := h.repository.Create(r.Context(), room); err != nil {
+	if err := h.repository.Delete(r.Context(), id); err != nil {
 		render.JSON(w, r, resp.Error(err.Error()))
 		return
 	}

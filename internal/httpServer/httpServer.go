@@ -9,26 +9,27 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-type Server struct {
-	serveMux      *chi.Mux
-	logger        *slog.Logger
-	roomsHandlers *roomsHandlers
-	usersHandlers *usersHandlers
+type HttpServer struct {
+	serveMux         *chi.Mux
+	logger           *slog.Logger
+	roomsHandlers    *roomsHandlers
+	usersHandlers    *usersHandlers
+	messagesHandlers *messagesHandlers
 }
 
-func New(rR roomsRepository, uR usersRepository, log *slog.Logger) *Server {
-	const op = "httpServer.rs.New"
+func New(rR roomsRepository, uR usersRepository, mR messagesRepository, log *slog.Logger) *HttpServer {
 	router := chi.NewRouter()
-	s := &Server{
+	s := &HttpServer{
 		logger:   log,
 		serveMux: router,
 		roomsHandlers: &roomsHandlers{
 			repository: rR,
-			logger:     log,
 		},
 		usersHandlers: &usersHandlers{
 			repository: uR,
-			logger:     log,
+		},
+		messagesHandlers: &messagesHandlers{
+			repository: mR,
 		},
 	}
 	s.serveMux.Use(middleware.RequestID)
@@ -38,19 +39,23 @@ func New(rR roomsRepository, uR usersRepository, log *slog.Logger) *Server {
 	return s
 }
 
-func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *HttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.serveMux.ServeHTTP(w, r)
 }
 
-func (s *Server) configureRoutes() {
+func (s *HttpServer) configureRoutes() {
 	s.serveMux.Group(func(r chi.Router) {
 		s.serveMux.Post("/room/subscribe", s.roomsHandlers.subscribeUserToRoom)
 		s.serveMux.Post("/room/create", s.roomsHandlers.create)
 	})
 	s.serveMux.Group(func(r chi.Router) {
 		s.serveMux.Post("/user/create", s.usersHandlers.create)
-		s.serveMux.Post("/user/delete", s.usersHandlers.delete)
-		s.serveMux.Post("/user/get-by-id", s.usersHandlers.getById)
+		s.serveMux.Delete("/user/delete/{id}", s.usersHandlers.delete)
+		s.serveMux.Get("/user/{id}", s.usersHandlers.getById)
+	})
+	s.serveMux.Group(func(r chi.Router) {
+		s.serveMux.Post("/messages/send", s.messagesHandlers.sendMessage)
+		s.serveMux.Delete("/messages/delete/{id}", s.messagesHandlers.deleteMessage)
 	})
 
 }

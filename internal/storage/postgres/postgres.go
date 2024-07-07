@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"golang-websocket-chat/internal/config"
+	"golang-websocket-chat/internal/models"
 
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
@@ -32,7 +33,7 @@ func New(conf config.Postgres) (*Storage, error) {
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
-	db.RegisterModel((*UserToRoom)(nil))
+	db.RegisterModel((*models.UserToRoom)(nil))
 	return &Storage{
 		db: db,
 	}, nil

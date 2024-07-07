@@ -3,8 +3,8 @@ package main
 import (
 	"golang-websocket-chat/internal/config"
 	httpserver "golang-websocket-chat/internal/httpServer"
-	"golang-websocket-chat/internal/lib/sl"
 	"golang-websocket-chat/internal/storage/postgres"
+	sl "golang-websocket-chat/lib/logger/slog"
 	"log/slog"
 	"net/http"
 	"os"
@@ -12,16 +12,10 @@ import (
 	"syscall"
 )
 
-const (
-	envLocal = "local"
-	envDev   = "dev"
-	envProd  = "prod"
-)
-
 func main() {
 	cfg := config.MustLoad()
 
-	log := setupLogger(cfg.Env)
+	log := sl.New(cfg.Env)
 
 	log.Info("staring chat backend", slog.String("env", cfg.Env))
 	log.Debug("debug messages are enabled")
@@ -32,7 +26,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	rs := httpserver.New(storage.Rooms(), storage.Users(), log)
+	rs := httpserver.New(storage.Rooms(), storage.Users(), storage.Messages(), log)
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -58,19 +52,4 @@ func main() {
 	log.Info("stopping server")
 
 	log.Info("server stopped")
-
-}
-
-func setupLogger(env string) *slog.Logger {
-	var log *slog.Logger
-
-	switch env {
-	case envLocal:
-		log = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	case envDev:
-		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	case envProd:
-		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
-	}
-	return log
 }
