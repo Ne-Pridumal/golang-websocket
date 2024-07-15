@@ -13,6 +13,7 @@ type Config struct {
 	Env        string `yaml:"env"`
 	Postgres   `yaml:"postgres"`
 	HTTPServer `yaml:"http_server"`
+	Redis      `yaml:"redis"`
 }
 
 type HTTPServer struct {
@@ -28,6 +29,11 @@ type Postgres struct {
 	Port     string `yaml:"port" env-default:"postgres"`
 	Ssl      bool   `yaml:"ssl" env-default:"false"`
 	Db       string `yaml:"db" env-required:"true"`
+}
+
+type Redis struct {
+	Address  string `yaml:"address"`
+	Password string `yaml:"password"`
 }
 
 func MustLoad() Config {

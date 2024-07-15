@@ -3,6 +3,7 @@ package main
 import (
 	"golang-websocket-chat/internal/config"
 	httpserver "golang-websocket-chat/internal/httpServer"
+	"golang-websocket-chat/internal/rs"
 	"golang-websocket-chat/internal/storage/postgres"
 	sl "golang-websocket-chat/lib/logger/slog"
 	"log/slog"
@@ -19,6 +20,12 @@ func main() {
 
 	log.Info("staring chat backend", slog.String("env", cfg.Env))
 	log.Debug("debug messages are enabled")
+
+	rdb, err := rs.New(cfg.Redis)
+	if err != nil {
+		log.Error("failed to init redis", sl.Err(err))
+		os.Exit(1)
+	}
 
 	storage, err := postgres.New(cfg.Postgres)
 	if err != nil {
